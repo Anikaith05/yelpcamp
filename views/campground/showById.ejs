@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= camp.title %></title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+    body {
+      background: linear-gradient(135deg, #f8f9fa 0%, #edf4ff 100%);
+      min-height: 100vh;
+      font-family: Arial, sans-serif;
+    }
+
+    .detail-card {
+      border: none;
+      border-radius: 1.5rem;
+      overflow: hidden;
+      box-shadow: 0 18px 45px rgba(15, 23, 42, 0.08);
+    }
+
+    .detail-image {
+      width: 100%;
+      height: 500px;
+      object-fit: cover;
+    }
+
+    .page-badge {
+      background: rgba(13, 110, 253, 0.1);
+      color: #0d6efd;
+      padding: 0.45rem 0.8rem;
+      border-radius: 999px;
+      font-weight: 700;
+      font-size: 0.85rem;
+    }
+
+    .action-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-top: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
+    <div class="container">
+      <a class="navbar-brand" href="/">YelpCamp</a>
+      <div class="ms-auto">
+        <a class="btn btn-outline-light" href="/campgrounds">All Campgrounds</a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container py-5">
+    <div class="card detail-card">
+      <img class="detail-image" src="<%= camp.image %>" alt="<%= camp.title %>">
+      <div class="card-body p-4 p-lg-5">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+          <div>
+            <h1 class="mb-2"><%= camp.title %></h1>
+            <p class="text-muted mb-0"><%= camp.location %></p>
+          </div>
+          <span class="page-badge">$<%= camp.price %> / night</span>
+        </div>
+
+        <p class="lead mt-4 mb-0"><%= camp.description %></p>
+
+        <div class="action-row">
+          <a class="btn btn-warning btn-lg" href="/campgrounds/<%= camp._id %>/edit">Edit Campground</a>
+          <form action="/campgrounds/<%= camp._id %>?_method=DELETE" method="POST" class="d-inline">
+            <button type="submit" class="btn btn-danger btn-lg">Delete</button>
+          </form>
+          <a class="btn btn-outline-secondary btn-lg" href="/campgrounds">Back to List</a>
+        </div>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

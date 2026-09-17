@@ -4,7 +4,7 @@ const path=require('path');
 const CampGround=require('./models/campground.js');
 const methodOverride=require('method-override');
 const joi=require('joi');
-
+const Review=require('./models/review.js');
 
 const app=express();
 app.set("view engine","ejs");
@@ -50,15 +50,24 @@ app.post("/campgrounds/new",validateData,async (req,res)=>{
     res.redirect(`/campgrounds/${camp._id}`);
 });
 
-app.get("/campgrounds/:id",async (req,res)=>{
+app.post("/campgrounds/:id/review",async(req,res)=>{
     const camp=await CampGround.findById(req.params.id);
-    res.render("campground/showById",{camp});
+    const review=await Review.create(req.body);
+    camp.reviews.push(review._id);
+    await camp.save();
+    res.redirect(`/campgrounds/${req.params.id}`);
 });
 
 app.get("/campgrounds/:id/edit",async (req,res)=>{
     const camp=await CampGround.findById(req.params.id);
     res.render("campground/edit",{camp});
 });
+
+app.get("/campgrounds/:id",async (req,res)=>{
+    const camp=await CampGround.findById(req.params.id).populate("reviews");
+    res.render("campground/showById",{camp});
+});
+
 
 app.put("/campgrounds/:id",validateData, async (req,res)=>{
     await CampGround.findByIdAndUpdate(req.params.id,req.body);

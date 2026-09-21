@@ -74,10 +74,29 @@ app.put("/campgrounds/:id",validateData, async (req,res)=>{
     res.redirect(`/campgrounds/${req.params.id}`);
 });
 
+app.delete("/campgrounds/:id/review/:reviewId",async(req,res)=>{
+    const camp= await CampGround.findById(req.params.id);
+    let index= camp.reviews.indexOf(req.params.id);
+    if(index!=-1){
+        camp.reviews.splice(index,1);
+    }
+    await Review.findByIdAndDelete(req.params.reviewId);
+    res.redirect(`/campgrounds/${req.params.id}`);
+});
+
 app.delete("/campgrounds/:id", async (req,res)=>{
+    const camp=await CampGround.findById(req.params.id);
+    const l=camp.reviews.length;
+    for(let i=0;i<l;i++){
+        await Review.findByIdAndDelete(camp.reviews[i]);
+    } 
+    camp.reviews.splice(0,l);
+    await camp.save();
     await CampGround.findByIdAndDelete(req.params.id);
     res.redirect("/campgrounds");
 });
+
+
 
 app.use((err,req,res,next)=>{
     res.status(err.status||500).render("error",{err});

@@ -7,15 +7,23 @@ const joi=require('joi');
 const Review=require('./models/review.js');
 
 const app=express();
+
+const camp_router=require('./routes/campground.js');
+const review_router=require('./routes/review.js');
+
+
 app.set("view engine","ejs");
 app.set("views",path.join(__dirname,"views"));
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(methodOverride("_method"));
+app.use('/campgrounds',camp_router);
+app.use('/campgrounds/:id/review',review_router);
 
 mongoose.connect("mongodb://localhost:27017/yelpcamp");
 
+//
 const schema=joi.object({
     title:joi.string().required(),
     location:joi.string().required(),
@@ -31,69 +39,10 @@ const validateData=(req,res,next)=>{
     }
     next();
 };
+//
 
 app.get("/",async (req,res)=>{
     res.render("home");
-});
-
-app.get("/campgrounds", async (req,res)=>{
-    const campgrounds=await CampGround.find({});
-    res.render("campground/show",{campgrounds});
-});
-
-app.get("/campgrounds/new",async (req,res)=>{
-    res.render("campground/form");
-});
-
-app.post("/campgrounds/new",validateData,async (req,res)=>{
-    const camp=await CampGround.create(req.body);
-    res.redirect(`/campgrounds/${camp._id}`);
-});
-
-app.post("/campgrounds/:id/review",async(req,res)=>{
-    const camp=await CampGround.findById(req.params.id);
-    const review=await Review.create(req.body);
-    camp.reviews.push(review._id);
-    await camp.save();
-    res.redirect(`/campgrounds/${req.params.id}`);
-});
-
-app.get("/campgrounds/:id/edit",async (req,res)=>{
-    const camp=await CampGround.findById(req.params.id);
-    res.render("campground/edit",{camp});
-});
-
-app.get("/campgrounds/:id",async (req,res)=>{
-    const camp=await CampGround.findById(req.params.id).populate("reviews");
-    res.render("campground/showById",{camp});
-});
-
-
-app.put("/campgrounds/:id",validateData, async (req,res)=>{
-    await CampGround.findByIdAndUpdate(req.params.id,req.body);
-    res.redirect(`/campgrounds/${req.params.id}`);
-});
-
-app.delete("/campgrounds/:id/review/:reviewId",async(req,res)=>{
-    const camp= await CampGround.findById(req.params.id);
-    let index= camp.reviews.indexOf(req.params.id);
-    if(index!=-1){
-        camp.reviews.splice(index,1);
-    }
-    await Review.findByIdAndDelete(req.params.reviewId);
-    res.redirect(`/campgrounds/${req.params.id}`);
-});
-
-app.delete("/campgrounds/:id", async (req,res)=>{
-    const camp=await CampGround.findById(req.params.id);
-    const l=camp.reviews.length;
-    for(let i=0;i<l;i++){
-        await Review.findByIdAndDelete(camp.reviews[i]);
-    } 
-    camp.reviews.splice(0,l);
-    await camp.save();
-    await CampGround.findByIdAndDelete(req.params.id);
-    res.redirect("/campgrounds");
 });
 
 
